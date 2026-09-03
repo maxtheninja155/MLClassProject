@@ -1,0 +1,12 @@
+/MLClassProject/Docs
+
+# Python (uv-managed virtual environment lives at the repo root)
+.venv/
+__pycache__/
+*.pyc
+
+# ML-Agents training output (mlagents-learn writes here when run from the repo root)
+results/
+
+# macOS
+.DS_Store

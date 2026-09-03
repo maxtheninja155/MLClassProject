@@ -1,0 +1,21 @@
+[project]
+name = "mlclassproject-training"
+version = "0.1.0"
+description = "Python training environment for the MLClassProject Unity ML-Agents project"
+# ML-Agents' Python trainer only supports Python 3.10.1 - 3.10.12.
+# The exact interpreter everyone uses is pinned in .python-version; uv downloads it automatically.
+requires-python = ">=3.10.1,<=3.10.12"
+dependencies = [
+    "mlagents-envs",
+    "mlagents",
+]
+
+# The Unity package com.unity.ml-agents 4.1.0 was built from this exact commit of the ml-agents repo
+# (see Library/PackageCache/com.unity.ml-agents@*/package.json -> repository.revision).
+# Installing the Python side from the same commit guarantees the communicator API (1.5.0) matches.
+# PyPI's mlagents 1.1.0 is NOT used because it pins an old grpcio that has no Apple Silicon wheel.
+# Note: grpcio's macOS universal2 wheels are mislabeled x86_64 internally, so uv reinstalls grpcio on every
+# sync on Apple Silicon. Harmless; every version in the allowed range has the same problem.
+[tool.uv.sources]
+mlagents-envs = { git = "https://github.com/Unity-Technologies/ml-agents.git", rev = "ee0a08ccae597094003844d0121317f9790a1676", subdirectory = "ml-agents-envs" }
+mlagents      = { git = "https://github.com/Unity-Technologies/ml-agents.git", rev = "ee0a08ccae597094003844d0121317f9790a1676", subdirectory = "ml-agents" }
