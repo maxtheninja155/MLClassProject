@@ -104,3 +104,7 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# ML-Agents writes timer stats here during editor play sessions
+/[Aa]ssets/ML-Agents/
+/[Aa]ssets/ML-Agents.meta

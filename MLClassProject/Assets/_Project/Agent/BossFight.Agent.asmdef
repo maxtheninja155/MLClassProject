@@ -1,0 +1,19 @@
+{
+    "name": "BossFight.Agent",
+    "rootNamespace": "BossFight.RL",
+    "references": [
+        "BossFight.Core",
+        "BossFight.Combat",
+        "BossFight.Boss",
+        "Unity.ML-Agents"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

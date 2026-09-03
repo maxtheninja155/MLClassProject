@@ -1,2 +1,8 @@
 * text=auto
 *.cs text diff=csharp
+
+# Unity YAML files: use Unity's Smart Merge when two people touch the same scene/prefab/asset.
+# One-time per-machine setup is in the README ("Unity merge tool").
+*.unity  merge=unityyamlmerge
+*.prefab merge=unityyamlmerge
+*.asset  merge=unityyamlmerge

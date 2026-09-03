@@ -1,6 +1,62 @@
 # MLClassProject
 Class Project for CS Machine Learning A Term 2026 
 
+## Project layout and ownership
+
+Game code lives in `MLClassProject/Assets/_Project/`. One folder per ticket, one assembly per folder, one owner per folder. Work inside your folder; if you need something changed elsewhere, ask its owner.
+
+| Folder | Assembly | May reference | Ticket |
+|---|---|---|---|
+| `_Project/Core` | `BossFight.Core` | nothing | T1 · Max |
+| `_Project/Combat` | `BossFight.Combat` | Core | T2 |
+| `_Project/Player` | `BossFight.Player` | Core, Combat | T3 |
+| `_Project/Boss` | `BossFight.Boss` | Core, Combat | T4 |
+| `_Project/Arena` | `BossFight.Arena` | Core, Combat | T5 |
+| `_Project/Agent` | `BossFight.Agent` | Core, Combat, Boss, ML-Agents | T6 · Max |
+
+- **Core** holds the few things everyone shares: `IDamageable`, `DamageInfo`, `AttackData`, `BossMove`, `FightEvents`. Change it by PR and tag the people it affects.
+- **Scenes:** `_Project/Arena/Scenes/Arena.unity` is the only shared scene (T5 owns it). Everyone else tests in their own `<Area>/Scenes/<Area>_Sandbox.unity`.
+- **Prefabs** belong to their folder's owner. To add something to someone else's prefab, make a prefab variant in your folder or ask.
+- Need a package in your assembly (Input System, Cinemachine, Animation Rigging)? Add it to your own `.asmdef` references.
+- Tags: `Player`, `Boss`. Layers: `Player`, `Boss`, `PlayerHitbox`, `BossHitbox`. Hitboxes only collide with the opposing body.
+- Input: `Assets/InputSystem_Actions.inputactions`, Player map: Move, Look, LightAttack, HeavyAttack, Roll, LockOn, Sprint.
+
+## Branching and pull requests
+
+- One branch per ticket, named `feat/T<n>-<short-name>`, for example `feat/T3-player`.
+- Rebase on `main` often. Open a PR into `main` when the ticket's "done when" is met. One reviewer, then merge and delete the branch.
+- A ticket is unblocked when its blocker is **merged to main**, not when it is done on a branch.
+- Never commit `Library/`, `Logs/`, builds, or `results/`.
+
+## Unity merge tool (one-time, per machine)
+
+If two people do touch the same scene or prefab, Unity's Smart Merge resolves most of it. Register it once:
+
+macOS (adjust the editor version to match `ProjectSettings/ProjectVersion.txt`):
+```
+git config --global merge.unityyamlmerge.name "Unity SmartMerge"
+git config --global merge.unityyamlmerge.driver "'/Applications/Unity/Hub/Editor/6000.6.0f1/Unity.app/Contents/Helpers/UnityYAMLMerge' merge -p %O %A %B %A"
+```
+
+Windows (PowerShell):
+```
+git config --global merge.unityyamlmerge.name "Unity SmartMerge"
+git config --global merge.unityyamlmerge.driver "'C:\Program Files\Unity\Hub\Editor\6000.6.0f1\Editor\Data\Tools\UnityYAMLMerge.exe' merge -p %O %A %B %A"
+```
+
+## Checking your ML-Agents setup
+
+After `uv sync`, prove Unity can talk to the trainer:
+
+1. Open `MLClassProject/Assets/_Project/Agent/Scenes/Agent_Smoke.unity`.
+2. From the repo root run:
+   ```
+   uv run mlagents-learn config/smoke.yaml --run-id=smoke_test --force
+   ```
+3. When the terminal says it is listening, press Play in Unity. You should see the trainer report it connected and print step summaries. Stop after a few seconds.
+
+If that works, the full pipeline works on your machine.
+
 ## Python setup (ML-Agents training)
 
 Everyone needs the **same** Python and package versions, because the Python trainer has to match the Unity package (`com.unity.ml-agents` 4.1.0). This repo pins both, so nobody installs Python by hand:
