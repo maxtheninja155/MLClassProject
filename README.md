@@ -23,9 +23,10 @@ Game code lives in `MLClassProject/Assets/_Project/`. One folder per ticket, one
 
 ## Branching and pull requests
 
+- `Development` is the integration branch. Branch from it and PR into it. `main` only gets updated from `Development` at milestones.
 - One branch per ticket, named `feat/T<n>-<short-name>`, for example `feat/T3-player`.
-- Rebase on `main` often. Open a PR into `main` when the ticket's "done when" is met. One reviewer, then merge and delete the branch.
-- A ticket is unblocked when its blocker is **merged to main**, not when it is done on a branch.
+- Rebase on `Development` often. Open a PR into `Development` when the ticket's "done when" is met. One reviewer, then merge and delete the branch.
+- A ticket is unblocked when its blocker is **merged to Development**, not when it is done on a branch.
 - Never commit `Library/`, `Logs/`, builds, or `results/`.
 
 ## Unity merge tool (one-time, per machine)
