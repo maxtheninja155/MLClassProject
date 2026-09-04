@@ -26,6 +26,18 @@ namespace BossFight.Input
             Intent intent = m_intentSource.GetIntent();
 
             Move(intent.Move);
+
+            //Debug testing
+            if ((intent.Debug & 1 << 0) != 0) {
+                transform.Rotate(Vector3.forward, 12.5f);
+            }
+            if ((intent.Debug & 1 << 2) != 0) {
+                transform.Rotate(Vector3.forward, -12.5f);
+            }
+
+            if (intent.Roll) {
+                transform.Rotate(Vector3.left, 25f);
+            }
             
         }
 

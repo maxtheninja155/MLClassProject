@@ -14,9 +14,6 @@ namespace BossFight.Core
         /// the human controller converts stick to world direction using its camera, so bodies never need a camera.</summary>
         public Vector3 Move;
 
-        /// <summary>Raw look input (mouse delta / right stick). Only a human controller's camera reads this; bodies ignore it.</summary>
-        public Vector2 Look;
-
         /// <summary>Pressed this frame (edge-triggered).</summary>
         public bool LightAttack;
 
@@ -26,11 +23,9 @@ namespace BossFight.Core
         /// <summary>Pressed this frame (edge-triggered).</summary>
         public bool Roll;
 
-        /// <summary>Pressed this frame (edge-triggered). The body treats it as a toggle.</summary>
-        public bool LockOn;
 
-        /// <summary>Held.</summary>
-        public bool Sprint;
+        /// <summary> a collection of bits determining which debug buttons have been requested. 4 bits long </summary>
+        public int Debug;
 
         public static Intent None => default;
     }

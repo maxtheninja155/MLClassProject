@@ -13,7 +13,6 @@ namespace BossFight.Input
 
     public class UserInput : MonoBehaviour, IIntentSource
     {
-        [SerializeField] private Camera m_camera;
 
         #region Queued Input
 
@@ -21,6 +20,7 @@ namespace BossFight.Input
         private bool m_queuedRoll = false;
         private bool m_queuedLightAttack = false;
         private bool m_queuedHeavyAttack = false;
+        private int m_queuedDebug = 0;
 
         private Intent m_intent;
 
@@ -36,7 +36,8 @@ namespace BossFight.Input
                 Move = m_queuedMove,
                 Roll = m_queuedRoll,
                 LightAttack = m_queuedLightAttack,
-                HeavyAttack = m_queuedHeavyAttack
+                HeavyAttack = m_queuedHeavyAttack,
+                Debug = m_queuedDebug
             };
         }
 
@@ -50,45 +51,135 @@ namespace BossFight.Input
             return m_intent;
         }
 
+        #region Input Patching
+
+        /// <summary>
+        /// Automatic unity event patching
+        /// </summary>
+        private void OnEnable() {
+            PlayerInput input = GetComponent<PlayerInput>();
+
+            // Move
+            input.actions["Move"].performed += OnMove;
+            input.actions["Move"].canceled += OnMove;
+            // Roll
+            input.actions["Roll"].performed += OnRoll;
+            input.actions["Roll"].canceled += OnRoll;
+            // LightAttack
+            input.actions["LightAttack"].performed += OnLightAttack;
+            input.actions["LightAttack"].canceled += OnLightAttack;
+            // HeavyAttack
+            input.actions["HeavyAttack"].performed += OnHeavyAttack;
+            input.actions["HeavyAttack"].canceled += OnHeavyAttack;
+
+            // Debug
+            input.actions["Debug1"].performed += OnDebug1;
+            input.actions["Debug2"].performed += OnDebug2;  
+            input.actions["Debug3"].performed += OnDebug3;
+            input.actions["Debug4"].performed += OnDebug4;
+            input.actions["Debug1"].canceled += OnDebug1;
+            input.actions["Debug2"].canceled += OnDebug2;  
+            input.actions["Debug3"].canceled += OnDebug3;
+            input.actions["Debug4"].canceled += OnDebug4;
+        }
+
+        /// <summary>
+        /// Removes event tie ins on disable to prevent memory leaks
+        /// </summary>
+        void OnDisable() {
+            PlayerInput input = GetComponent<PlayerInput>();
+
+            // Move
+            input.actions["Move"].performed -= OnMove;
+            input.actions["Move"].canceled -= OnMove;
+            // Roll
+            input.actions["Roll"].performed -= OnRoll;
+            input.actions["Roll"].canceled -= OnRoll;
+            // LightAttack
+            input.actions["LightAttack"].performed -= OnLightAttack;
+            input.actions["LightAttack"].canceled -= OnLightAttack;
+            // HeavyAttack
+            input.actions["HeavyAttack"].performed -= OnHeavyAttack;
+            input.actions["HeavyAttack"].canceled -= OnHeavyAttack;
+
+            // Debug
+            input.actions["Debug1"].performed -= OnDebug1;
+            input.actions["Debug2"].performed -= OnDebug2;  
+            input.actions["Debug3"].performed -= OnDebug3;
+            input.actions["Debug4"].performed -= OnDebug4;
+            input.actions["Debug1"].canceled -= OnDebug1;
+            input.actions["Debug2"].canceled -= OnDebug2;  
+            input.actions["Debug3"].canceled -= OnDebug3;
+            input.actions["Debug4"].canceled -= OnDebug4;
+        }
+
+        #endregion
+
         #region Input Reading
 
         /// <summary>
         /// Reads and caches the inputed movement value
         /// contextualizes raw input into world space
         /// </summary>
-        /// <param name="value"></param>
-        public void OnMove(InputValue value) {
-            Vector2 inputVector = value.Get<Vector2>();
+        public void OnMove(InputAction.CallbackContext context) {
+            Vector2 inputVector = context.ReadValue<Vector2>();
 
             // queue input relative to camera orientation on XZ plane
-            Vector3 facing = Vector3.ProjectOnPlane(m_camera.transform.forward, Vector3.up).normalized;
-            Vector3 right = Vector3.ProjectOnPlane(m_camera.transform.right, Vector3.up).normalized;
+            Vector3 facing = Vector3.ProjectOnPlane(Camera.main.transform.forward, Vector3.up).normalized;
+            Vector3 right = Vector3.ProjectOnPlane(Camera.main.transform.right, Vector3.up).normalized;
             m_queuedMove = facing * inputVector.y + right * inputVector.x;
         }
 
         /// <summary>
         /// queues a roll input for the next frame
         /// </summary>
-        /// <param name="value"></param>
-        public void OnRoll(InputValue value) {
-            m_queuedRoll = value.isPressed;
+        public void OnRoll(InputAction.CallbackContext context) {
+            m_queuedRoll = context.performed;
         }
 
         /// <summary>
         /// queues a light attack input for the next frame
         /// </summary>
-        /// <param name="value"></param>
-        public void OnLightAttack(InputValue value) {
-            m_queuedLightAttack = value.isPressed;
+        public void OnLightAttack(InputAction.CallbackContext context) {
+            m_queuedLightAttack = context.performed;
         }
 
         /// <summary>
         /// queues a heavy attack input for the next frame
         /// </summary>
-        /// <param name="value"></param>
-        public void OnHeavyAttack(InputValue value) {
-            m_queuedHeavyAttack = value.isPressed;
+        public void OnHeavyAttack(InputAction.CallbackContext context) {
+            m_queuedHeavyAttack = context.performed;
         }
+
+        #region Debug Input
+
+        /// <summary>
+        /// Helper function used by the following debug input functions
+        /// toggles the specified bit to relate to the pressed parameter
+        /// </summary>
+        /// <param name="pressed">if the bit should be toggled on</param>
+        /// <param name="bit">which bit(s) is being affected</param>
+        private void UpdateDebug(bool pressed, int bit) {
+            if (pressed)
+                m_queuedDebug |= bit;
+            else
+                m_queuedDebug &= ~bit;
+        }
+
+        public void OnDebug1(InputAction.CallbackContext context) {
+            UpdateDebug(context.performed, 1);
+        }
+        public void OnDebug2(InputAction.CallbackContext context) {
+            UpdateDebug(context.performed, 2);
+        }
+        public void OnDebug3(InputAction.CallbackContext context) {
+            UpdateDebug(context.performed, 4);
+        }
+        public void OnDebug4(InputAction.CallbackContext context) {
+            UpdateDebug(context.performed, 8);
+        }
+
+        #endregion
 
         #endregion
     }
