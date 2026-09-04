@@ -1,0 +1,17 @@
+{
+    "name": "BossFight.Player",
+    "rootNamespace": "BossFight.Player",
+    "references": [
+        "BossFight.Core",
+        "BossFight.Combat"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

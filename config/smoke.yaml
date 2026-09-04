@@ -1,0 +1,19 @@
+# Smallest PPO config that runs. Used only by the Agent_Smoke scene to check that Unity can talk to Python.
+# Run:  uv run mlagents-learn config/smoke.yaml --run-id=smoke_test --force   then press Play.
+behaviors:
+  Smoke:
+    trainer_type: ppo
+    hyperparameters:
+      batch_size: 32
+      buffer_size: 256
+      learning_rate: 3.0e-4
+    network_settings:
+      hidden_units: 16
+      num_layers: 1
+    reward_signals:
+      extrinsic:
+        gamma: 0.99
+        strength: 1.0
+    max_steps: 3000
+    time_horizon: 32
+    summary_freq: 500

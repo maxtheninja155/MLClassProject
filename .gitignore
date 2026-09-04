@@ -10,3 +10,4 @@ results/
 
 # macOS
 .DS_Store
+/MLClassProject/.vscode
