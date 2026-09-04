@@ -19,7 +19,7 @@ namespace BossFight.Combat
         public float Current => Pool.Current;
         public float Normalized => Pool.Normalized;
 
-        void Awake() => pool = new StaminaPool(max, regenPerSecond, regenDelay);
+        void Awake() => pool ??= new StaminaPool(max, regenPerSecond, regenDelay);
         void Update() => Pool.Tick(Time.deltaTime);
 
         public bool CanAfford(float cost) => Pool.CanAfford(cost);

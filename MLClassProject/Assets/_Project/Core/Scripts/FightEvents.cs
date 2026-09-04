@@ -17,5 +17,13 @@ namespace BossFight.Core
 
         public static void RaiseHit(GameObject attacker, GameObject victim, DamageInfo info) => OnHit?.Invoke(attacker, victim, info);
         public static void RaiseDeath(GameObject victim) => OnDeath?.Invoke(victim);
+
+        /// <summary>Static events outlive a play session when domain reload is off. Start every session clean.</summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ClearOnPlayStart()
+        {
+            OnHit = null;
+            OnDeath = null;
+        }
     }
 }

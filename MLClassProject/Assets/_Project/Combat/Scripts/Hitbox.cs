@@ -8,7 +8,8 @@ namespace BossFight.Combat
     /// A sphere of damage. <see cref="AttackRunner"/> arms it for the attack's active window and disarms it after.
     /// While armed it runs one overlap query per physics step and hits each target at most once per swing.
     /// Needs no collider or rigidbody. Put it on a child of the body (one per weapon or fist, more if a move
-    /// needs coverage) on the PlayerHitbox or BossHitbox layer: the layer collision matrix decides what it can hit.
+    /// needs coverage) on the PlayerHitbox or BossHitbox layer. The layer collision matrix decides what it can hit,
+    /// and the mask is read once in Awake, so set the layer on the prefab rather than at spawn time.
     /// </summary>
     public class Hitbox : MonoBehaviour
     {
@@ -16,15 +17,23 @@ namespace BossFight.Combat
         [SerializeField] Vector3 offset = Vector3.zero;
         [SerializeField, Min(0.01f)] float radius = 0.5f;
 
-        GameObject owner;
+        GameObject attacker;
         AttackData attack;
         int layerMask;
-        readonly HashSet<Health> hitThisSwing = new HashSet<Health>();
+        readonly HashSet<IDamageable> hitThisSwing = new HashSet<IDamageable>();
         readonly Collider[] buffer = new Collider[32];
 
         public bool IsArmed { get; private set; }
+        public Vector3 Offset { get => offset; set => offset = value; }
+        public float Radius { get => radius; set => radius = Mathf.Max(0.01f, value); }
 
         void Awake() => layerMask = MaskFromCollisionMatrix(gameObject.layer);
+
+        void OnValidate()
+        {
+            if (!LayerMask.LayerToName(gameObject.layer).EndsWith("Hitbox"))
+                Debug.LogWarning($"{name}: Hitbox is on layer '{LayerMask.LayerToName(gameObject.layer)}'. It should be on PlayerHitbox or BossHitbox, or it will hit everything.", this);
+        }
 
         /// <summary>Everything the collision matrix lets this layer touch.</summary>
         static int MaskFromCollisionMatrix(int layer)
@@ -35,10 +44,10 @@ namespace BossFight.Combat
             return mask;
         }
 
-        public void Arm(AttackData data, GameObject attacker)
+        public void Arm(AttackData data, GameObject attackerObject)
         {
             attack = data;
-            owner = attacker;
+            attacker = attackerObject;
             hitThisSwing.Clear();
             IsArmed = true;
         }
@@ -48,6 +57,8 @@ namespace BossFight.Combat
             IsArmed = false;
             attack = null;
         }
+
+        void OnDisable() => Disarm();
 
         void FixedUpdate()
         {
@@ -68,10 +79,10 @@ namespace BossFight.Combat
         {
             var hurt = other.GetComponentInParent<Hurtbox>();
             if (hurt == null || hurt.Owner == null) return;
-            if (owner != null && hurt.Owner.transform.IsChildOf(owner.transform)) return;   // never hit yourself
+            if (attacker != null && hurt.transform.IsChildOf(attacker.transform)) return;   // never hit yourself
             if (!hitThisSwing.Add(hurt.Owner)) return;
 
-            hurt.Owner.TakeDamage(new DamageInfo(attack.Damage, owner));
+            hurt.Owner.TakeDamage(new DamageInfo(attack.Damage, attacker));
         }
 
         void OnDrawGizmos()

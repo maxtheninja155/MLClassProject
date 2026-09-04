@@ -25,11 +25,11 @@ namespace BossFight.Combat
 
         /// <summary>A hit landed on this body.</summary>
         public event Action<DamageInfo> Damaged;
-        /// <summary>A hit was ignored because of i-frames.</summary>
-        public event Action<DamageInfo> Blocked;
+        /// <summary>A hit was ignored because of i-frames (a roll).</summary>
+        public event Action<DamageInfo> Dodged;
         public event Action Died;
 
-        void Awake() => pool = new HealthPool(max);
+        void Awake() => pool ??= new HealthPool(max);
 
         public void GrantInvulnerability(float seconds) =>
             invulnerableUntil = Mathf.Max(invulnerableUntil, Time.time + seconds);
@@ -45,7 +45,7 @@ namespace BossFight.Combat
             if (IsDead) return;
             if (IsInvulnerable)
             {
-                Blocked?.Invoke(info);
+                Dodged?.Invoke(info);
                 return;
             }
 

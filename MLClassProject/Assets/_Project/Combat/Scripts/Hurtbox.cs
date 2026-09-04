@@ -1,24 +1,19 @@
+using BossFight.Core;
 using UnityEngine;
 
 namespace BossFight.Combat
 {
     /// <summary>
-    /// Marks a collider as "hitting this hurts the owner". Put it on the body's physical collider
-    /// (or any child collider) and it routes hits to the <see cref="Health"/> on the body root.
-    /// The collider must be on the body's layer (Player or Boss) so the collision matrix works.
+    /// Marks a collider as "hitting this hurts the owner". Put it on the body's physical collider or any child collider;
+    /// colliders below it count too. Hits route to the nearest <see cref="IDamageable"/> up the hierarchy
+    /// (normally <see cref="Health"/> on the body root). The collider must be on the body's layer (Player or Boss)
+    /// so the collision matrix works.
     /// </summary>
     [RequireComponent(typeof(Collider))]
     public class Hurtbox : MonoBehaviour
     {
-        [SerializeField] Health owner;
+        IDamageable owner;
 
-        public Health Owner => owner;
-
-        void Awake()
-        {
-            if (owner == null) owner = GetComponentInParent<Health>();
-        }
-
-        void Reset() => owner = GetComponentInParent<Health>();
+        public IDamageable Owner => owner ??= GetComponentInParent<IDamageable>();
     }
 }
