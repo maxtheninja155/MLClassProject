@@ -11,3 +11,9 @@ results/
 # macOS
 .DS_Store
 /MLClassProject/.vscode
+
+# Blender save backups
+*.blend1
+
+# Renders and screenshots next to Blender sources stay local
+art/**/*.png
