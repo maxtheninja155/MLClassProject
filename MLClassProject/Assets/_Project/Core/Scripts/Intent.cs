@@ -12,7 +12,7 @@ namespace BossFight.Core
     {
         /// <summary>World-space XZ direction to move, magnitude 0..1. Never raw stick input:
         /// the human controller converts stick to world direction using its camera, so bodies never need a camera.</summary>
-        public Vector2 Move;
+        public Vector3 Move;
 
         /// <summary>Raw look input (mouse delta / right stick). Only a human controller's camera reads this; bodies ignore it.</summary>
         public Vector2 Look;
