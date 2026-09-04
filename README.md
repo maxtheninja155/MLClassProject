@@ -14,7 +14,7 @@ Game code lives in `MLClassProject/Assets/_Project/`. One folder per ticket, one
 | `_Project/Arena` | `BossFight.Arena` | Core, Combat | T5 |
 | `_Project/Agent` | `BossFight.Agent` | Core, Combat, Boss, ML-Agents | T6 · Max |
 
-- **Core** holds the few things everyone shares: `IDamageable`, `DamageInfo`, `AttackData`, `BossMove`, `FightEvents`. Change it by PR and tag the people it affects.
+- **Core** holds the few things everyone shares: `Intent` + `IIntentSource` (controller → body contract; human input, bot, and ML agent all produce an `Intent`, either body consumes it), `IDamageable`, `DamageInfo`, `AttackData`, `BossMove`, `FightEvents`. Change it by PR and tag the people it affects.
 - **Scenes:** `_Project/Arena/Scenes/Arena.unity` is the only shared scene (T5 owns it). Everyone else tests in their own `<Area>/Scenes/<Area>_Sandbox.unity`.
 - **Prefabs** belong to their folder's owner. To add something to someone else's prefab, make a prefab variant in your folder or ask.
 - Need a package in your assembly (Input System, Cinemachine, Animation Rigging)? Add it to your own `.asmdef` references.
