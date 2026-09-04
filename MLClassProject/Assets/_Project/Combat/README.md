@@ -13,8 +13,8 @@ On the body root:
 - `AttackRunner` — plays an `AttackData` timeline. Point it at the hitbox below and the `Stamina`.
 
 On a child object:
-- `Hitbox` — a Sphere, Box, or Capsule collider describing the damage volume, on the `PlayerHitbox` or `BossHitbox` layer.
-  The collider stays disabled; the hitbox runs its own overlap query each physics step while armed.
+- `Hitbox` — a sphere of damage (offset + radius, no collider needed) on the `PlayerHitbox` or `BossHitbox` layer.
+  One per weapon or fist; add more children if a move needs coverage. It runs its own overlap query each physics step while armed.
 
 ## Using it
 

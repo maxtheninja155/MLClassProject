@@ -5,18 +5,17 @@ using UnityEngine;
 namespace BossFight.Combat
 {
     /// <summary>
-    /// A damage volume. <see cref="AttackRunner"/> arms it for the attack's active window and disarms it after.
-    /// While armed it runs an overlap query every physics step and hits each target at most once per swing.
-    /// It does not use trigger events on purpose: a hitbox that never moves stops getting them once PhysX sleeps it.
-    ///
-    /// Put it on a child of the body with a Sphere, Box, or Capsule collider that describes the volume.
-    /// The collider itself stays disabled; only its shape is read. Put the object on the PlayerHitbox or BossHitbox
-    /// layer: the layer collision matrix decides what it can hit.
+    /// A sphere of damage. <see cref="AttackRunner"/> arms it for the attack's active window and disarms it after.
+    /// While armed it runs one overlap query per physics step and hits each target at most once per swing.
+    /// Needs no collider or rigidbody. Put it on a child of the body (one per weapon or fist, more if a move
+    /// needs coverage) on the PlayerHitbox or BossHitbox layer: the layer collision matrix decides what it can hit.
     /// </summary>
-    [RequireComponent(typeof(Collider))]
     public class Hitbox : MonoBehaviour
     {
-        Collider col;
+        [Tooltip("Sphere center in this object's local space.")]
+        [SerializeField] Vector3 offset = Vector3.zero;
+        [SerializeField, Min(0.01f)] float radius = 0.5f;
+
         GameObject owner;
         AttackData attack;
         int layerMask;
@@ -25,14 +24,7 @@ namespace BossFight.Combat
 
         public bool IsArmed { get; private set; }
 
-        void Awake()
-        {
-            col = GetComponent<Collider>();
-            col.enabled = false;
-            layerMask = MaskFromCollisionMatrix(gameObject.layer);
-        }
-
-        void Reset() => GetComponent<Collider>().isTrigger = true;
+        void Awake() => layerMask = MaskFromCollisionMatrix(gameObject.layer);
 
         /// <summary>Everything the collision matrix lets this layer touch.</summary>
         static int MaskFromCollisionMatrix(int layer)
@@ -66,36 +58,10 @@ namespace BossFight.Combat
 
         int Overlap()
         {
-            var t = transform;
-            var scale = t.lossyScale;
-            switch (col)
-            {
-                case SphereCollider s:
-                {
-                    float r = s.radius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z));
-                    return Physics.OverlapSphereNonAlloc(t.TransformPoint(s.center), r, buffer, layerMask, QueryTriggerInteraction.Collide);
-                }
-                case BoxCollider b:
-                {
-                    var half = Vector3.Scale(b.size, scale) * 0.5f;
-                    half = new Vector3(Mathf.Abs(half.x), Mathf.Abs(half.y), Mathf.Abs(half.z));
-                    return Physics.OverlapBoxNonAlloc(t.TransformPoint(b.center), half, buffer, t.rotation, layerMask, QueryTriggerInteraction.Collide);
-                }
-                case CapsuleCollider c:
-                {
-                    Vector3 axis = c.direction == 0 ? Vector3.right : c.direction == 1 ? Vector3.up : Vector3.forward;
-                    float axisScale = c.direction == 0 ? scale.x : c.direction == 1 ? scale.y : scale.z;
-                    float radiusScale = c.direction == 0 ? Mathf.Max(scale.y, scale.z) : c.direction == 1 ? Mathf.Max(scale.x, scale.z) : Mathf.Max(scale.x, scale.y);
-                    float r = c.radius * Mathf.Abs(radiusScale);
-                    float half = Mathf.Max(0f, c.height * 0.5f * Mathf.Abs(axisScale) - r);
-                    var center = t.TransformPoint(c.center);
-                    var dir = t.TransformDirection(axis).normalized;
-                    return Physics.OverlapCapsuleNonAlloc(center + dir * half, center - dir * half, r, buffer, layerMask, QueryTriggerInteraction.Collide);
-                }
-                default:
-                    Debug.LogWarning($"{name}: Hitbox supports Sphere, Box, and Capsule colliders only.", this);
-                    return 0;
-            }
+            var center = transform.TransformPoint(offset);
+            var s = transform.lossyScale;
+            float worldRadius = radius * Mathf.Max(s.x, s.y, s.z);
+            return Physics.OverlapSphereNonAlloc(center, worldRadius, buffer, layerMask, QueryTriggerInteraction.Collide);
         }
 
         void TryHit(Collider other)
@@ -110,16 +76,9 @@ namespace BossFight.Combat
 
         void OnDrawGizmos()
         {
-            var c = col != null ? col : GetComponent<Collider>();
-            if (c == null) return;
             Gizmos.color = IsArmed ? new Color(1f, 0.2f, 0.1f, 0.6f) : new Color(1f, 0.6f, 0.1f, 0.15f);
-            Gizmos.matrix = transform.localToWorldMatrix;
-            switch (c)
-            {
-                case SphereCollider s: Gizmos.DrawSphere(s.center, s.radius); break;
-                case BoxCollider b: Gizmos.DrawCube(b.center, b.size); break;
-                case CapsuleCollider cc: Gizmos.DrawWireSphere(cc.center, cc.radius); break;
-            }
+            var s = transform.lossyScale;
+            Gizmos.DrawSphere(transform.TransformPoint(offset), radius * Mathf.Max(s.x, s.y, s.z));
         }
     }
 }
