@@ -102,6 +102,7 @@ namespace BossFight.Player
                 if (Time.time - input.timeOfRequest > m_inputBuffer) {
                     m_bufferedInputs.RemoveAt(i);
                     i--;
+                    continue;
                 }
                 
                 // try to resolve valid buffered input
