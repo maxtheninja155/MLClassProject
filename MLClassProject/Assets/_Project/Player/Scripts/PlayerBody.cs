@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using BossFight.Core;
 using UnityEngine;
@@ -28,6 +29,8 @@ namespace BossFight.Player
 
         // Base movement speed walking around
         [SerializeField] private float m_speed = 5f;
+        [SerializeField] private float m_rotationSpeed = 720f;
+        [SerializeField] private float m_midActionRotationSpeed = 270f;
 
         [Header("Roll")]
         [SerializeField] private float m_rollDistance = 3f;
@@ -61,13 +64,21 @@ namespace BossFight.Player
 
             // Process this frame's intent and resolve buffer
             ProcessIntent();
+
+            // Always rotate towards direction of input
+            Quaternion targetRotation = Quaternion.LookRotation(m_lastDirection, Vector3.up);
+            float rotationSpeed = ActionReady() ? m_rotationSpeed : m_midActionRotationSpeed;
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation,
+                (ActionReady() ? m_rotationSpeed : m_midActionRotationSpeed) * Time.deltaTime);
         }
 
         #region Input/Intent
 
         // if input is recieved while action is unavailable
         // it will be stored in a buffer for this many seconds before being discarded
-        [SerializeField] private float m_inputBuffer = .5f;
+        [Header("Input General")]
+        [SerializeField] private float m_inputBuffer = .25f;
+        private Vector3 m_movementInput = Vector3.zero, m_lastDirection = Vector3.forward;
         private IIntentSource m_intentSource;
 
         // Requested input is processed through a buffer
@@ -85,6 +96,11 @@ namespace BossFight.Player
         private void ProcessIntent() {
             // read this frame's intent
             Intent intent = m_intentSource.GetIntent();
+
+            // record this frame's movement input and direction
+            m_movementInput = intent.Move;
+            if (m_movementInput != Vector3.zero)
+                m_lastDirection = m_movementInput.normalized;
 
             // resolves action request in the order of events decided below
             if (intent.Roll)
@@ -127,6 +143,12 @@ namespace BossFight.Player
                     break;
                 }
             }
+
+            // move the player accordingly
+            // check if an action has not just been taken
+            if (ActionReady()) {
+                transform.position += m_movementInput * m_speed * Time.deltaTime;
+            }
         }
 
         /// <summary>
@@ -134,7 +156,6 @@ namespace BossFight.Player
         /// </summary>
         /// <param name="action">what action to buffer</param>
         private void BufferInput(Action action) {
-            Debug.Log("Buffered action: " + action);
             m_bufferedInputs.Add(new bufferedInput { action = action, timeOfRequest = Time.time });
         }
         
@@ -154,8 +175,23 @@ namespace BossFight.Player
         /// initiates an action cooldown
         /// </summary>
         private void Roll() {
-            m_cooldownTimer = m_rollDuration;
-            Debug.Log("Rolling");
+            // stop any existing coroutines and start a new one
+            StopAllCoroutines();
+            StartCoroutine(RollSequence());
+        }
+
+        IEnumerator RollSequence() {
+            // set action cooldown timer
+            m_cooldownTimer = m_rollDuration; // reduced in update loop
+
+            // move the player accordingly
+            while (m_cooldownTimer > 0f) {
+                float t = m_cooldownTimer / m_rollDuration; // inverted 
+                float distance = m_rollDistance * 2 * t; // integral of this from 0 to 1 is m_rollDistance
+                transform.position += m_lastDirection * distance     * Time.deltaTime;
+                
+                yield return new WaitForEndOfFrame();
+            }
         }
 
         /// <summary>
