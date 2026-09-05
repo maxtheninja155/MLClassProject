@@ -8,12 +8,16 @@ Game code lives in `MLClassProject/Assets/_Project/`. One folder per ticket, one
 | Folder | Assembly | May reference | Ticket |
 |---|---|---|---|
 | `_Project/Core` | `BossFight.Core` | nothing | T1 · Max |
-| `_Project/Combat` | `BossFight.Combat` | Core | T2 |
+| `_Project/Combat` | `BossFight.Combat` | Core | T2 · Max |
 | `_Project/Player` | `BossFight.Player` | Core, Combat | T3 |
 | `_Project/Boss` | `BossFight.Boss` | Core, Combat | T4 |
 | `_Project/Arena` | `BossFight.Arena` | Core, Combat | T5 |
 | `_Project/Agent` | `BossFight.Agent` | Core, Combat, Boss, ML-Agents | T6 · Max |
+| `_Project/Input` | `BossFight.Input` | Core, Input System, Cinemachine | T7 · Glove |
+| `tools/`, `config/` (repo root) | Python, no assembly | — | T8 · Training tooling |
+| `_Project/Telemetry` | `BossFight.Telemetry` | Core | T9 · Episode logging |
 
+- **Combat** is documented in `MLClassProject/Assets/_Project/Combat/README.md`: how to put health, stamina, hurtboxes, hitboxes, and attacks on a body.
 - **Core** holds the few things everyone shares: `Intent` + `IIntentSource` (controller → body contract; human input, bot, and ML agent all produce an `Intent`, either body consumes it), `IDamageable`, `DamageInfo`, `AttackData`, `BossMove`, `FightEvents`. Change it by PR and tag the people it affects.
 - **Scenes:** `_Project/Arena/Scenes/Arena.unity` is the only shared scene (T5 owns it). Everyone else tests in their own `<Area>/Scenes/<Area>_Sandbox.unity`.
 - **Prefabs** belong to their folder's owner. To add something to someone else's prefab, make a prefab variant in your folder or ask.
