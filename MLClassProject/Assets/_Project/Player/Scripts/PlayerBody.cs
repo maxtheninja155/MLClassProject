@@ -9,6 +9,8 @@ namespace BossFight.Player
 {
     public class PlayerBody : MonoBehaviour
     {
+        private Animator m_animator;
+
         #region Player Params
 
         // amount of time left until action ready, see ActionReady()
@@ -47,10 +49,11 @@ namespace BossFight.Player
         #endregion
 
         /// <summary>
-        /// Gets reference to intent source
+        /// Gets references to components
         /// </summary>
         void Start() {
             m_intentSource = GetComponent<IIntentSource>();
+            m_animator = GetComponent<Animator>();
         }
 
         /// <summary>
@@ -184,6 +187,8 @@ namespace BossFight.Player
             // set action cooldown timer
             m_cooldownTimer = m_rollDuration; // reduced in update loop
 
+            m_animator.SetTrigger("Roll");
+
             // move the player accordingly
             while (m_cooldownTimer > 0f) {
                 float t = m_cooldownTimer / m_rollDuration; // inverted 
@@ -200,7 +205,9 @@ namespace BossFight.Player
         /// </summary>
         private void LightAttack() {
             m_cooldownTimer = m_lightAttackDuration;
-            Debug.Log("Light Attacking");
+            m_animator.SetTrigger("Light");
+
+            Debug.Log("Light Attack Triggered");
         }
 
         /// <summary>
@@ -209,7 +216,7 @@ namespace BossFight.Player
         /// </summary>
         private void HeavyAttack() {
             m_cooldownTimer = m_heavyAttackDuration;
-            Debug.Log("Heavy Attacking");
+            m_animator.SetTrigger("Heavy");
         }
 
         #endregion
