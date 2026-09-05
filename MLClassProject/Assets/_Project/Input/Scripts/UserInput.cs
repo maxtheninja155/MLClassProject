@@ -9,6 +9,13 @@ namespace BossFight.Input
     /// <summary>
     /// Reads input from the user and formats it into an Intent to be sent to a body
     /// Also resolve camera guidance through Cinemachine
+    /// Input:
+    ///     Move - vector2
+    ///     Roll - bool, tap only
+    ///     LightAttack - bool
+    ///     HeavyAttack - bool
+    ///     Debug - bits, 4 inputs
+    ///         debug4 - tap only
     /// </summary>
 
     public class UserInput : MonoBehaviour, IIntentSource
@@ -20,7 +27,7 @@ namespace BossFight.Input
         private bool m_queuedRoll = false;
         private bool m_queuedLightAttack = false;
         private bool m_queuedHeavyAttack = false;
-        private int m_queuedDebug = 0;
+        private int m_queuedDebug = 0; // debug 4 is tap only
 
         private Intent m_intent;
 
@@ -39,6 +46,10 @@ namespace BossFight.Input
                 HeavyAttack = m_queuedHeavyAttack,
                 Debug = m_queuedDebug
             };
+
+            // Assure tap only inputs
+            m_queuedRoll = false;
+            m_queuedDebug &= ~8; // debug4 is tap only
         }
 
         /// <summary>
